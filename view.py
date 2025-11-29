@@ -1,15 +1,5 @@
-
-contact_exists = 'Такой контакт уже существует!'
-contact_added = 'Контакт успешно добавлен!'
-empty = 'Телефонная книга пуста'
-contact_search_data = input('Введите имя контакта, номер телефона или комментарий для поиска по справочнику: ')
-no_contact = 'Контакт отсутствует!'
-no_idx_contact = 'Контакт по такому индексу не найден'
-val_err = 'Введите числовое значение!'
-sucess_remove = 'Контакт успешно удалён'
-
-
-
+import text
+from prettytable import PrettyTable
 
 
 
@@ -18,11 +8,13 @@ class Interface:
     def __init__(self, data):
         self.data = data
 
-    def beautiful_show(self):
+
+    @staticmethod
+    def beautiful_show(contacts):
         my_table = PrettyTable()
         my_table.field_names = ['Номер', 'Имя', 'Телефон', 'Кто таков']
-        for idx, val in self.data.items():
-            idx = str(idx)
+        for idx, val in enumerate(contacts, start=1):
+            idx = int(idx)
             row = [idx, val['name'], val['phone'], val['tag']]
             my_table.add_row(row)
         return my_table.get_string()
@@ -38,3 +30,28 @@ class Interface:
                 print('Введите корректный номер телефона - 7999xxxxxxx')
         tag = input('Введите комментарий: ')
         return {'name': name, 'phone': phone, 'tag': tag}
+
+    @staticmethod
+    def index_for_contacts(contacts):
+        final_result = {}
+        for idx, contact in enumerate(contacts, start=1):
+            final_result[idx] = contact
+        return final_result
+
+    @staticmethod
+    def user_menu_choice():
+        while True:
+            main_menu_choice = input(text.main_menu_choice)
+            if main_menu_choice.isdigit() and 1 <= int(main_menu_choice) <= len(text.main_menu):
+                return int(main_menu_choice)
+            else:
+                print(text.main_menu_error)
+
+
+
+
+    @staticmethod
+    def show_menu():
+        for idx, paragraph in enumerate(text.main_menu, start=1):
+            print(f'{idx}. {paragraph}')
+
