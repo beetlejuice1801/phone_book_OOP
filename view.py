@@ -8,6 +8,10 @@ class Interface:
     def __init__(self, data):
         self.data = data
 
+    @staticmethod
+    def get_contact_search_data():
+        return input('\nВведите имя контакта, номер телефона или комментарий для поиска по справочнику: \n')
+
 
     @staticmethod
     def beautiful_show(contacts):
@@ -47,11 +51,20 @@ class Interface:
             else:
                 print(text.main_menu_error)
 
+    @staticmethod
+    def user_choice_for_edit():
+        while True:
+            user_choice = text.get_field()
+            if user_choice.isdigit() and 1 <= int(user_choice) <= 3:
+                return int(user_choice)
+            else:
+                print(text.field_error)
+
 
 
 
     @staticmethod
-    def show_menu():
-        for idx, paragraph in enumerate(text.main_menu, start=1):
+    def show_menu(data):
+        for idx, paragraph in enumerate(data, start=1):
             print(f'{idx}. {paragraph}')
 

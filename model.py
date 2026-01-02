@@ -1,5 +1,6 @@
 import json
 from text import contact_added, contact_exists, empty, no_contact, no_idx_contact
+from text import get_index, sucess_remove, val_err, change_name, change_phone, change_tag, data_changed
 
 
 class ContactsInPhonebook:
@@ -21,24 +22,49 @@ class ContactsInPhonebook:
 
     def find_contact(self, find_data):
         found_contact = []
-        contacts_dict = dict(self.contacts.copy())
-        for idx, contact in contacts_dict.items():
+        for contact in self.contacts:
             if any(find_data.lower() in str(contact[field]).lower() for field in ['name', 'phone', 'tag']):
                 found_contact.append(contact)
-            else:
-                return no_contact
-        return found_contact
+        if len(found_contact) == 0:
+            return no_contact
+        else:
+            return found_contact
 
-    def delete_contact(self):
+    def change_by_index(self):
         try:
-            contact_for_delete = text.get_index_for_delete()
-            if 1 <= contact_for_delete <= len(self.contacts):
-                del self.contacts[contact_for_delete - 1]
+            contact_for_change = get_index()
+            if 1 <= contact_for_change <= len(self.contacts):
+                return contact_for_change - 1
             else:
                 return no_idx_contact
         except ValueError:
             return val_err
+
+    def delete_contact(self):
+        del self.contacts[self.change_by_index()]
         return sucess_remove
+
+    def change_contact(self, contact_index, field_choice):
+        if not (0 <= contact_index < len(self.contacts)):
+            return no_idx_contact
+        contact_to_change = self.contacts[contact_index]
+        values_list = list(contact_to_change.values())
+
+        if field_choice == 1:
+            name = change_name()
+            values_list[0] = name
+        elif field_choice == 2:
+            phone = change_phone()
+            values_list[1] = phone
+        elif field_choice == 3:
+            tag = change_tag()
+            values_list[2] = tag
+
+        contact_to_change['name'] = values_list[0]
+        contact_to_change['phone'] = values_list[1]
+        contact_to_change['tag'] = values_list[2]
+
+        return data_changed
 
 
 class FileManager:
