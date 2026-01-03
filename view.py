@@ -1,17 +1,56 @@
 import text
 from prettytable import PrettyTable
-
-
+import re
+from typing import Optional, Tuple
 
 
 class Interface:
     def __init__(self, data):
         self.data = data
 
-    @staticmethod
-    def get_contact_search_data():
-        return input('\nВведите имя контакта, номер телефона или комментарий для поиска по справочнику: \n')
+    NAME_PATTERN = r'^[A-ZА-ЯЁ][a-zа-яё]+(?:\s[A-ZА-ЯЁ][a-zа-яё]+)*$'
+    PHONE_PATTERN = r'^(\+7|7|8)[\s\-]?\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}$'
 
+    @staticmethod
+    def validate_name(name: str) -> Tuple[bool, Optional[str]]:
+        if not name or not name.strip():
+            return False, 'Поле не может быть пустым'
+
+        if len(name) > 70:
+            return False, 'Имя слишком длинное'
+
+        if not re.match(Interface.NAME_PATTERN, name.title()):
+            return False, 'Имя может содержать только буквы и пробелы'
+
+        return True, None
+
+    @staticmethod
+    def validate_phone(phone: str) -> Tuple[bool, Optional[str]]:
+        if not phone or not phone.strip():
+            return False, 'Поле не может быть пустым'
+
+        correct_phone = re.sub(r'[^\d+]', '', phone.strip())
+
+        if len(correct_phone) < 10:
+            return False, 'Номер телефона слишком короткий'
+
+        if len(correct_phone) > 16:
+            return False, 'Номер телефона слишком длинный'
+
+        if not re.match(r'^(\+7|7|8)\d{10}$', correct_phone):
+            if correct_phone.startswith('8'):
+                correct_phone = '7' + correct_phone[1::]
+            elif correct_phone.startswith('+7'):
+                correct_phone = '7' + correct_phone[2::]
+            elif correct_phone == 10:
+                correct_phone += '7'
+            else:
+                return False, 'Неверный формат. Используйте +7XXXCCCYYZZ'
+
+        if len(correct_phone) != 11:
+            return False, f'Неверный формат. Номер должен содержать 11 цифр. Сейчас {len(correct_phone)}'
+
+        return True, None
 
     @staticmethod
     def beautiful_show(contacts):
@@ -25,13 +64,20 @@ class Interface:
 
     @staticmethod
     def user_input():
-        name = input('Введите имя контакта: ')
         while True:
-            try:
-                phone = int(input('Введите номер телефона контакта: '))
+            name = input('Введите имя контакта: ')
+            valid_name, error = Interface.validate_name(name)
+            if valid_name:
                 break
-            except ValueError:
-                print('Введите корректный номер телефона - 7999xxxxxxx')
+            print(f'Ошибка: {error}')
+
+        while True:
+            phone = (input('Введите номер телефона контакта: '))
+            valid_phone, error = Interface.validate_phone(phone)
+            if valid_phone:
+                break
+            print(f'Ошибка: {error}')
+
         tag = input('Введите комментарий: ')
         return {'name': name, 'phone': phone, 'tag': tag}
 
@@ -60,11 +106,7 @@ class Interface:
             else:
                 print(text.field_error)
 
-
-
-
     @staticmethod
     def show_menu(data):
         for idx, paragraph in enumerate(data, start=1):
             print(f'{idx}. {paragraph}')
-
