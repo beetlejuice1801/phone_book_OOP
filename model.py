@@ -1,6 +1,7 @@
 import json
 from text import contact_added, contact_exists, empty, no_contact, no_idx_contact
 from text import get_index, sucess_remove, val_err, change_name, change_phone, change_tag, data_changed
+import typing
 
 
 class ContactsInPhonebook:
@@ -10,7 +11,10 @@ class ContactsInPhonebook:
     def __str__(self):
         return str(self.contacts)
 
-    def create_contact(self, new_contact):
+    def create_contact(self, new_contact: dict[str, str]) -> list[dict[str, str]]:
+
+        '''Создание контакта'''
+
         all_names = [contact['name'] for contact in self.contacts]
 
         if new_contact['name'] in all_names:
@@ -20,7 +24,10 @@ class ContactsInPhonebook:
             self.contacts.append(new_contact)
             return contact_added
 
-    def find_contact(self, find_data):
+    def find_contact(self, find_data: str) -> list[dict[str, str]]:
+
+        '''Поиск контакта'''
+
         found_contact = []
         for contact in self.contacts:
             if any(find_data.lower() in str(contact[field]).lower() for field in ['name', 'phone', 'tag']):
@@ -30,7 +37,10 @@ class ContactsInPhonebook:
         else:
             return found_contact
 
-    def change_by_index(self):
+    def change_by_index(self) -> int:
+
+        '''Получение индекса контакта для дальнейшего изменения'''
+
         try:
             contact_for_change = get_index()
             if 1 <= contact_for_change <= len(self.contacts):
@@ -41,10 +51,16 @@ class ContactsInPhonebook:
             return val_err
 
     def delete_contact(self):
+
+        '''Удаление контакта'''
+
         del self.contacts[self.change_by_index()]
         return sucess_remove
 
-    def change_contact(self, contact_index, field_choice):
+    def change_contact(self, contact_index: int, field_choice: int) -> dict:
+
+        '''Изменение контакта'''
+
         if not (0 <= contact_index < len(self.contacts)):
             return no_idx_contact
         contact_to_change = self.contacts[contact_index]
@@ -72,10 +88,16 @@ class FileManager:
         self.filename = filename
 
     def open_file(self):
+
+        '''Открытие файла'''
+
         with open(self.filename, 'r', encoding='utf-8') as f:
             file = json.load(f)
             return file
 
     def save_file(self, contacts):
+
+        '''Сохранение файла'''
+
         with open(self.filename, 'w', encoding='utf-8') as f:
             json.dump(contacts, f, ensure_ascii=False, indent=4)

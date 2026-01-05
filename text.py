@@ -30,7 +30,7 @@ def get_contact_search_data():
     return input('\nВведите имя контакта, номер телефона или комментарий для поиска по справочнику: \n')
 
 def get_index():
-    return int(input('\nВведите индекс контакта: \n'))
+    return int(input('\nВведите индекс контакта: '))
 
 def get_field():
     return input('\nВведите, что хотите изменить(цифрой)\n 1. Имя | 2. Номер | 3. Комментарий\n')
