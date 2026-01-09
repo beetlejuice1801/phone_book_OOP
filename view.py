@@ -1,10 +1,14 @@
-import text
-from prettytable import PrettyTable
+'''Модуль пользовательского интерфейса телефонного справочника.'''
+
+from typing import Optional, Tuple, List, Dict
 import re
-from typing import Optional, Tuple
+from prettytable import PrettyTable
+import text
 
 
 class Interface:
+    '''Класс, отвечающий за пользовательский ввод и отображение.'''
+
     def __init__(self, data):
         self.data = data
 
@@ -12,38 +16,55 @@ class Interface:
 
     @staticmethod
     def validate_name(name: str) -> Tuple[bool, Optional[str], Optional[str]]:
+        '''Валидация ввода имени.
 
-        '''Валидация ввода имени'''
-
+        Args:
+            name: Имя для валидации
+        Returns:
+            Кортеж(успех, сообщение об ошибке, исправленное имя)
+        '''
         if not name or not name.strip():
-            return False, 'Поле не может быть пустым', None
+            err_msg = 'Поле не может быть пустым'
+            return False, err_msg, None
 
         cleaned = name.strip()
 
         if len(cleaned) > 40:
-            return False, 'Имя слишком длинное', None
+            err_msg = 'Имя слишком длинное'
+            return False, err_msg, None
 
         corrected_name = name.title()
 
         if not re.match(Interface.NAME_PATTERN, corrected_name):
-            return False, 'Имя может содержать только буквы и пробелы', None
+            err_msg = 'Имя может содержать только буквы и пробелы'
+            return False, err_msg, None
 
         return True, None, corrected_name
 
     @staticmethod
     def validate_phone(phone: str) -> Tuple[bool, Optional[str], Optional[str]]:
+        '''Валидация ввода номера.
 
-        '''Валидация ввода номера'''
-
+        Args:
+            phone: Номер для валидации
+        Returns:
+            Кортеж(успех, сообщение об ошибке, исправленный номер)
+        '''
         if not phone or not phone.strip():
-            return False, 'Поле не может быть пустым', None
+            err_msg = 'Поле не может быть пустым.'
+            return False, err_msg, None
 
         cleaned = re.sub(r'[^\d+]', '', phone.strip())
 
         if len(cleaned) < 11:
-            return False, 'Номер телефона слишком короткий. Используйте формат 7YYYXXXCCZZ', None
+            err_msg = 'Номер телефона слишком короткий.'
+            err_msg += 'Используйте формат 7YYYXXXCCZZ.'
+            return False, err_msg, None
+
         if len(cleaned) > 16:
-            return False, 'Номер телефона слишком длинный. Используйте формат 7YYYXXXCCZZ', None
+            err_msg = 'Номер телефона слишком длинный.'
+            err_msg += 'Используйте формат 7YYYXXXCCZZ.'
+            return False, err_msg, None
 
         if cleaned.startswith('8'):
             corrected_phone = '7' + cleaned[1:]
@@ -58,18 +79,25 @@ class Interface:
             return False, 'Неверный формат', None
 
         if len(corrected_phone) != 11:
-            return False, f'Неверный формат. Номер должен содержать 11 цифр. Сейчас: {len(corrected_phone)}', None
+            err_msg = 'Неверный формат. Номер должен содержать 11 цифр. '
+            err_msg += f'Сейчас: {len(corrected_phone)}.'
+            return False, err_msg, None
 
         if not corrected_phone.isdigit():
-            return False, 'Номер должен содержать только цифры', None
+            err_msg = 'Номер должен содержать только цифры.'
+            return False, err_msg, None
 
         return True, None, corrected_phone
 
     @staticmethod
-    def beautiful_show(contacts: list[dict[str, any]]):
+    def beautiful_show(contacts: List[Dict[str, any]]) -> str:
+        '''Табличное отображение контактов.
 
-        '''Табличное отображение контактов'''
-
+        Args:
+            contacts: Список контактов
+        Returns:
+            Таблица в виде строки
+        '''
         my_table = PrettyTable()
         my_table.field_names = ['Номер', 'Имя', 'Телефон', 'Кто таков']
         for idx, val in enumerate(contacts, start=1):
@@ -80,6 +108,11 @@ class Interface:
 
     @staticmethod
     def user_input():
+        '''Пользовательский ввод для создания контакта.
+
+        Returns:
+            Словарь с данными контакта
+        '''
         while True:
             name = input('Введите имя контакта: ')
             valid_name, error, correct_name = Interface.validate_name(name)
@@ -99,12 +132,13 @@ class Interface:
         tag = input('Введите комментарий: ')
         return {'name': name, 'phone': phone, 'tag': tag}
 
-
     @staticmethod
     def user_menu_choice() -> int:
+        '''Выбор пункта меню.
 
-        '''Выбор пункта меню'''
-
+        Returns:
+            int: Выбранный пункт меню
+        '''
         while True:
             main_menu_choice = input(text.main_menu_choice)
             if main_menu_choice.isdigit() and 1 <= int(main_menu_choice) <= len(text.main_menu):
@@ -114,9 +148,11 @@ class Interface:
 
     @staticmethod
     def user_choice_for_edit() -> int:
+        '''Выбор поля для изменения контакта.
 
-        '''Выбор поля для изменения контакта'''
-
+        Returns:
+            int: Выбранное поле для изменения
+        '''
         while True:
             user_choice = text.get_field()
             if user_choice.isdigit() and 1 <= int(user_choice) <= 3:
@@ -126,5 +162,6 @@ class Interface:
 
     @staticmethod
     def show_menu(data):
+        '''Отображение главного меню.'''
         for idx, paragraph in enumerate(data, start=1):
             print(f'{idx}. {paragraph}')
